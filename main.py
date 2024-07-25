@@ -42,7 +42,54 @@ SLEEP_TIMER = 15 ## задержка после загрузки данных с
 
 
 @dataclass
-class URFUInfo15Other:
+class URFU9:
+    nomer: int
+    snils: str
+    reg_nomer: int
+    prioritet: int
+    original: str
+    exam01: str
+    dostigeniya: str
+    summa: int
+    pravo: str
+    comment: str = field(default='')
+
+@dataclass
+class URFU12:
+    nomer: int
+    snils: str
+    reg_nomer: int
+    prioritet: int
+    original: str
+    exam01: str
+    exam02: str
+    exam03: str
+    exam04: str
+    dostigeniya: str
+    summa: int
+    pravo: str
+    comment: str = field(default='')
+
+@dataclass
+class URFU14:
+    nomer: int
+    snils: str
+    reg_nomer: int
+    prioritet: int
+    original: str
+    exam01: str
+    exam02: str
+    exam03: str
+    exam04: str
+    exam05: str
+    exam06: str
+    dostigeniya: str
+    summa: int
+    pravo: str
+    comment: str = field(default='')
+
+@dataclass
+class URFU15:
     nomer: int
     snils: str
     reg_nomer: int
@@ -61,7 +108,7 @@ class URFUInfo15Other:
     comment: str = field(default='')
 
 @dataclass
-class URFUInfo16Other:
+class URFU16:
     nomer: int
     snils: str
     reg_nomer: int
@@ -81,7 +128,7 @@ class URFUInfo16Other:
     comment: str = field(default='')
 
 @dataclass
-class URFUInfo17Other:
+class URFU17:
     nomer: int
     snils: str
     reg_nomer: int
@@ -140,6 +187,8 @@ def urfu_load_pages():
         resp = requests.get(actual_full_link, headers={'User-Agent': user_agent})
         page = resp.content.decode('utf-8')
 
+        if not os.path.exists('saved_data/urfu'):
+            os.makedirs('saved_data/urfu')
         with open(f"saved_data/urfu/{actual_file_name}", "w") as wf:
             wf.write(page)
         sleep(SLEEP_TIMER)
@@ -154,7 +203,7 @@ def get_latest_urfu_files() -> list[str]:
     return sorted(output)
 
 
-def get_urfu_spec_users(files_list, vuz_number) -> dict[int, list[URFUInfo15Other | URFUInfo16Other | URFUInfo17Other]]:
+def get_urfu_spec_users(files_list, vuz_number) -> dict[int, list[URFU9 | URFU12| URFU14 | URFU15 | URFU16 | URFU17]]:
     file_spec = list(filter(lambda item: f'00{URFU_INNER_VUZ.get(vuz_number)}' in item, files_list))[0]
 
     with open(f"saved_data/urfu/{file_spec}") as rf:
@@ -163,7 +212,7 @@ def get_urfu_spec_users(files_list, vuz_number) -> dict[int, list[URFUInfo15Othe
     soup = BeautifulSoup(saved_raw_page, 'lxml')
     tables = soup.find_all('table', {'class': 'table-header'})
     count = 0
-    spec_users_dict: dict[int, list[URFUInfo15Other | URFUInfo16Other | URFUInfo17Other]] = {
+    spec_users_dict: dict[int, list[URFU9 | URFU12| URFU14 | URFU15 | URFU16 | URFU17]] = {
         1: [],
         2: [],
         3: [],
@@ -179,12 +228,18 @@ def get_urfu_spec_users(files_list, vuz_number) -> dict[int, list[URFUInfo15Othe
             for tr in all_tr:
                 all_td = tr.find_all('td')
                 td_list = [td.text for td in all_td]
-                if len(td_list) == 15:
-                    user_info = URFUInfo15Other(*td_list)
+                if len(td_list) == 9:
+                    user_info = URFU9(*td_list)
+                elif len(td_list) == 12:
+                    user_info = URFU12(*td_list)
+                elif len(td_list) == 14:
+                    user_info = URFU14(*td_list)
+                elif len(td_list) == 15:
+                    user_info = URFU15(*td_list)
                 elif len(td_list) == 16:
-                    user_info = URFUInfo16Other(*td_list)
+                    user_info = URFU16(*td_list)
                 elif len(td_list) == 17:
-                    user_info = URFUInfo17Other(*td_list)
+                    user_info = URFU17(*td_list)
                 if user_info.snils == URFU_USER_ID:
                     user_info.comment = f'план приема {accept_plan_number}   -= !!! =-'
                 else:
@@ -193,8 +248,8 @@ def get_urfu_spec_users(files_list, vuz_number) -> dict[int, list[URFUInfo15Othe
     return spec_users_dict
 
 
-def get_urfu_other_users(files_list) -> list[URFUInfo15Other | URFUInfo16Other | URFUInfo17Other]:
-    all_other_users: list[URFUInfo15Other | URFUInfo16Other | URFUInfo17Other] = []
+def get_urfu_other_users(files_list) -> list[URFU9 | URFU12| URFU14 | URFU15 | URFU16 | URFU17]:
+    all_other_users: list[URFU9 | URFU12| URFU14 | URFU15 | URFU16 | URFU17] = []
     for file in files_list:
         with open(f"saved_data/urfu/{file}") as rf:
             saved_raw_page = rf.read()
@@ -212,12 +267,18 @@ def get_urfu_other_users(files_list) -> list[URFUInfo15Other | URFUInfo16Other |
             for tr in all_tr:
                 all_td = tr.find_all('td')
                 td_list = [td.text for td in all_td]
-                if len(td_list) == 15:
-                    user_info = URFUInfo15Other(*td_list)
+                if len(td_list) == 9:
+                    user_info = URFU9(*td_list)
+                elif len(td_list) == 12:
+                    user_info = URFU12(*td_list)
+                elif len(td_list) == 14:
+                    user_info = URFU14(*td_list)
+                elif len(td_list) == 15:
+                    user_info = URFU15(*td_list)
                 elif len(td_list) == 16:
-                    user_info = URFUInfo16Other(*td_list)
+                    user_info = URFU16(*td_list)
                 elif len(td_list) == 17:
-                    user_info = URFUInfo17Other(*td_list)
+                    user_info = URFU17(*td_list)
                 user_info.comment = f'план приема - {accept_plan_number} чел; {special_code}'
                 all_other_users.append(user_info)
     return all_other_users
@@ -292,8 +353,42 @@ def urfu():
             count += 1
 
 
+def get_urfu_by_regnom(regnom, count=0):
+    print(f'\n{count if count > 0 else ''} === search by REG.№{regnom} ===')
+    latest_files = get_latest_urfu_files()
+    all_other_users: list[URFU9 | URFU12| URFU14 | URFU15 | URFU16 | URFU17] = get_urfu_other_users(latest_files)
+    users_with_regnom: list[URFU9 | URFU12| URFU14 | URFU15 | URFU16 | URFU17] = list(filter(lambda user: user.reg_nomer == regnom, all_other_users))
+    users_with_regnom_sorted = sorted(users_with_regnom, key=lambda user: user.prioritet)
+    # for user in users_with_regnom_sorted:
+    #     plan_priema = re.search(r'\d+', user.comment.split(';')[0])[0]
+    #     print(f"[#{user.nomer} из {plan_priema}] ПРИОРИТЕТ[{user.prioritet}] {user.comment.split(';')[-1].strip()};\tСНИЛС[{user.snils if user.snils else '---'}] РЕГ.№{user.reg_nomer} ОРИГ.ДОК[{user.original if user.original else 'Не'}]")
+    return users_with_regnom_sorted
+
+
+def get_urfu_spec_all_info_by_regnom():
+    latest_files = get_latest_urfu_files()
+    spec_users_dict: dict[int, list[URFU9 | URFU12| URFU14 | URFU15 | URFU16 | URFU17]] = get_urfu_spec_users(latest_files, '1') ## see line #16 - VUZ number
+    count = 1
+    offset = 65
+    now = datetime.now()
+    with open(f"Д{now.day}-{now.hour}Ч{now.minute}М-ALL_INFO_0_{offset}.csv", "w") as wf:
+        writer = csv.DictWriter(wf, ['number', 'regnom', 'data'])
+        writer.writeheader()
+        for spec_user in spec_users_dict.get(4)[:offset]:
+            data_list = get_urfu_by_regnom(spec_user.reg_nomer, count)
+            for data in data_list:
+                plan_priema = re.search(r'\d+', data.comment.split(';')[0])[0]
+                writer.writerow({
+                    "number": count,
+                    "regnom": spec_user.reg_nomer,
+                    "data": f"[#{data.nomer} из {plan_priema}] ПРИОРИТЕТ[{data.prioritet}] {data.comment.split(';')[-1].strip()};\tСНИЛС[{data.snils if data.snils else '---'}] РЕГ.№{data.reg_nomer} ОРИГ.ДОК[{data.original if data.original else 'Не'}]"
+                })
+            count += 1
+
+
 def spbgu_load_pages():
-    spbgu_data_url = 'https://application.spbu.ru/enrollee_lists/lists?id='
+    # spbgu_data_url_old = 'https://application.spbu.ru/enrollee_lists/lists?id='
+    spbgu_data_url = 'https://application.spbu.ru/enrollee_lists/list-view-lists?id='
 
     user_agent = UserAgent().chrome
     for spec_id in SPBGU_SPEC_ID.keys():
@@ -323,7 +418,7 @@ def get_spbgu_spec_users(fileslist, spec_id) -> list[SPBGUInfo]:
     with open(f"saved_data/spbgu/{file}") as rf:
         json_data = json.load(rf)
         # print(json_data, len(json_data))
-        for data in json_data:
+        for data in json_data.get('list'):
             spec_user = SPBGUInfo(
                 data.get('id'),
                 data.get('competitive_group_id'),
@@ -346,7 +441,7 @@ def get_spbgu_other_users(fileslist, spec_id) -> list[SPBGUInfo]:
         with open(f"saved_data/spbgu/{file}") as rf:
             json_data = json.load(rf)
             # print(json_data, len(json_data))
-            for data in json_data:
+            for data in json_data.get('list'):
                 spec_user = SPBGUInfo(
                     data.get('id'),
                     data.get('competitive_group_id'),
@@ -434,12 +529,18 @@ def spbgu():
                 writer.writerows([asdict(_)])
                 total_count += 1
             if spec_user.snils == SPBGU_USER_ID:
-                print(f'!!#{spec_user.nomer} СНИЛС[{spec_user.snils}] ПРИОРИТЕТ[{spec_user.prioritet}] --- MECTO: {total_count}/{SPBGU_SPEC_ID.get(spec_id)[1]}')
+                print(f'!!#{spec_user.nomer} СНИЛС[{spec_user.snils}] ПРИОРИТЕТ[{spec_user.prioritet}] --- MECTO: {total_count - 1}/{SPBGU_SPEC_ID.get(spec_id)[1]}')
 
 
 def main():
     urfu()
     spbgu()
+    get_urfu_spec_all_info_by_regnom()
+
+    # data_list = get_urfu_by_regnom('331062')
+    # for data in data_list:
+    #     plan_priema = re.search(r'\d+', data.comment.split(';')[0])[0]
+    #     print(f"[#{data.nomer} из {plan_priema}] ПРИОРИТЕТ[{data.prioritet}] {data.comment.split(';')[-1].strip()};\tСНИЛС[{data.snils if data.snils else '---'}] РЕГ.№{data.reg_nomer} ОРИГ.ДОК[{data.original if data.original else 'Не'}]")
 
 
 if __name__ == '__main__':
